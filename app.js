@@ -1,11 +1,11 @@
 var config = {
-  apiKey: "AIzaSyCTgywEoqMmtkHjWuitqCrJPyr7ncBwY84",
-  authDomain: "fir-crudtest-92ab7.firebaseapp.com",
-  databaseURL: "https://fir-crudtest-92ab7.firebaseio.com",
-  projectId: "fir-crudtest-92ab7",
-  storageBucket: "fir-crudtest-92ab7.appspot.com",
-  messagingSenderId: "351443672288",
-  appId: "1:351443672288:web:da8c6b7821972eaef4c485"
+    apiKey: "AIzaSyCTgywEoqMmtkHjWuitqCrJPyr7ncBwY84",
+    authDomain: "fir-crudtest-92ab7.firebaseapp.com",
+    databaseURL: "https://fir-crudtest-92ab7.firebaseio.com",
+    projectId: "fir-crudtest-92ab7",
+    storageBucket: "fir-crudtest-92ab7.appspot.com",
+    messagingSenderId: "351443672288",
+    appId: "1:351443672288:web:da8c6b7821972eaef4c485"
 };
 
 //initialize database and global db ref
@@ -21,89 +21,93 @@ setupEventHandlers();
 
 function setupEventHandlers() {
 
-  reviewForm.addEventListener("submit", e => {
-    e.preventDefault(); //prevent page reload
+    //user clicks the submit button (create or update)
+    reviewForm.addEventListener("submit", e => {
+        e.preventDefault(); //prevent page reload
 
-    createReview();
-  });
+        handleSubmit();
+        Materialize.updateTextFields();
+    });
 
-  //works as the R in CRUD
-  reviewsRef.on("child_added", data => {
-    readReviews(data);
-  });
+    //user updates/deletes a particular review
+    reviews.addEventListener("click", e => {
+        updateReview(e);
+        deleteReview(e);
+    });
 
-  reviewsRef.on("child_changed", data => {
-    var reviewNode = document.getElementById(data.key);
-    reviewNode.innerHTML = reviewTemplate(data.val());
-  });
+    //Firebase events
+    reviewsRef.on("child_added", data => {
+        readReviews(data);
+    });
 
-  reviewsRef.on("child_removed", data => {
-    var reviewNode = document.getElementById(data.key);
-    reviewNode.parentNode.removeChild(reviewNode);
-  });
+    reviewsRef.on("child_changed", data => {
+        var reviewNode = document.getElementById(data.key);
+        reviewNode.innerHTML = reviewTemplate(data.val());
+    });
 
-  reviews.addEventListener("click", e => {
-    updateReview(e);
-    deleteReview(e);
-  });
+    reviewsRef.on("child_removed", data => {
+        var reviewNode = document.getElementById(data.key);
+        reviewNode.parentNode.removeChild(reviewNode);
+    });
 }
 
 //CRUD operations
-function createReview() {
-  var reviewForm = document.getElementById("reviewForm");
-  var fullName = document.getElementById("fullName");
-  var message = document.getElementById("message");
-  var hiddenId = document.getElementById("hiddenId");
+function handleSubmit() {
+    var reviewForm = document.getElementById("reviewForm");
+    var fullName = document.getElementById("fullName");
+    var message = document.getElementById("message");
+    var hiddenId = document.getElementById("hiddenId");
 
-  //perform simple client-side validation
-  if (!fullName.value || !message.value) return null;
+    //perform simple client-side validation
+    if (!fullName.value || !message.value) return null;
 
-  var id = hiddenId.value || Date.now();
+    var id = hiddenId.value || Date.now();
 
-  //create new node in Firebase  
-  db.ref("reviews/" + id).set({
-    fullName: fullName.value,
-    message: message.value,
-    createdAt: firebase.database.ServerValue.TIMESTAMP
-  });
+    //create new node / update existing node in Firebase    
+    db.ref("reviews/" + id).set({
+        fullName: fullName.value,
+        message: message.value,
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+    });
 
-  clearForm();
+
+    clearForm();
 }
 
 function readReviews(data) {
-  var li = document.createElement("li");
-  li.id = data.key;
-  li.innerHTML = reviewTemplate(data.val());
-  reviews.appendChild(li);
+    var li = document.createElement("li");
+    li.id = data.key;
+    li.innerHTML = reviewTemplate(data.val());
+    reviews.appendChild(li);
 }
 
 function updateReview(e) {
-  var reviewNode = e.target.parentNode;
+    var reviewNode = e.target.parentNode;
 
-  if (e.target.classList.contains("edit")) {
-    fullName.value = reviewNode.querySelector(".fullName").innerText;
-    message.value = reviewNode.querySelector(".message").innerText;
+    if (e.target.classList.contains("edit")) {
+        fullName.value = reviewNode.querySelector(".fullName").innerText;
+        message.value = reviewNode.querySelector(".message").innerText;
 
-    hiddenId.value = reviewNode.id;
-    //Materialize.updateTextFields();
-  }
+        hiddenId.value = reviewNode.id;
+        Materialize.updateTextFields();
+    }
 }
 
 function deleteReview(e) {
-  var reviewNode = e.target.parentNode;
+    var reviewNode = e.target.parentNode;
 
-  if (e.target.classList.contains("delete")) {
-    var id = reviewNode.id;
-    db.ref("reviews/" + id).remove(); //Delete node at Firebase
-    clearForm();
-  }
+    if (e.target.classList.contains("delete")) {
+        var id = reviewNode.id;
+        db.ref("reviews/" + id).remove(); //Delete node at Firebase
+        clearForm();
+    }
 }
 
 
 function reviewTemplate({ fullName, message, createdAt }) {
-  var dateFormatted = new Date(createdAt);
+    var createdAtFormatted = new Date(createdAt);
 
-  return `
+    return `
     <div>
       <label>Full Name:</label>
       <label class="fullName"><strong>${fullName}</strong></label>
@@ -114,7 +118,7 @@ function reviewTemplate({ fullName, message, createdAt }) {
     </div>
     <div>
       <label>Created:</label>
-     <label class="createdAt">${dateFormatted}</label>
+     <label class="createdAt">${createdAtFormatted}</label>
     </div>
     <br>
     <button class="waves-effect waves-light btn delete">Delete</button>
@@ -125,7 +129,7 @@ function reviewTemplate({ fullName, message, createdAt }) {
 
 // Utility method to clear the form
 function clearForm() {
-  fullName.value = "";
-  message.value = "";
-  hiddenId.value = "";
+    fullName.value = "";
+    message.value = "";
+    hiddenId.value = "";
 }
