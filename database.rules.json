@@ -1,0 +1,14 @@
+
+{
+  "rules": {
+    ".read": true,
+    ".write": true,
+	"reviews": {   
+    "$node_id": {
+       ".validate": "newData.hasChildren(['fullName', 'message'])
+      &&	newData.child('fullName').isString() && newData.child('fullName').val().length < 4
+      && newData.child('message').isString() && newData.child('message').val().length < 100"
+      }  
+  	}   	
+  }
+}

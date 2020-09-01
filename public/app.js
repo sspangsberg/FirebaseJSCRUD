@@ -56,10 +56,11 @@ function handleSubmit() {
     var reviewForm = document.getElementById("reviewForm");
     var fullName = document.getElementById("fullName");
     var message = document.getElementById("message");
+    var tags = document.getElementById("tags");
     var hiddenId = document.getElementById("hiddenId");
 
     //perform simple client-side validation
-    if (!fullName.value || !message.value) return null;
+    if (!fullName.value || !message.value || !tags) return null;
 
     var id = hiddenId.value || Date.now();
 
@@ -67,6 +68,7 @@ function handleSubmit() {
     db.ref("reviews/" + id).set({
         fullName: fullName.value,
         message: message.value,
+        tags: tags.value,
         createdAt: firebase.database.ServerValue.TIMESTAMP
     });
 
@@ -87,6 +89,7 @@ function updateReview(e) {
     if (e.target.classList.contains("edit")) {
         fullName.value = reviewNode.querySelector(".fullName").innerText;
         message.value = reviewNode.querySelector(".message").innerText;
+        tags.value = reviewNode.querySelector(".tags").innerText;
 
         hiddenId.value = reviewNode.id;
         Materialize.updateTextFields();
@@ -104,7 +107,7 @@ function deleteReview(e) {
 }
 
 
-function reviewTemplate({ fullName, message, createdAt }) {
+function reviewTemplate({ fullName, message, tags, createdAt }) {
     var createdAtFormatted = new Date(createdAt);
 
     return `
@@ -115,6 +118,10 @@ function reviewTemplate({ fullName, message, createdAt }) {
     <div>
       <label>Message:</label>
       <label class="message">${message}</label>
+    </div>
+    <div>
+      <label>Tags:</label>
+      <label class="tags">${tags}</label>
     </div>
     <div>
       <label>Created:</label>
@@ -131,5 +138,6 @@ function reviewTemplate({ fullName, message, createdAt }) {
 function clearForm() {
     fullName.value = "";
     message.value = "";
+    tags.value = "";
     hiddenId.value = "";
 }
